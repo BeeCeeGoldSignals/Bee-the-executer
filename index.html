@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Bee the Executer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:18px}
+header{text-align:center;color:#f5c542;font-size:27px;font-weight:bold;padding:18px}
+.card{background:#1d293b;padding:18px;border-radius:14px;margin:14px 0}
+h3{margin-top:0;color:#f5c542}
+.price{font-size:32px;font-weight:bold}
+.green{color:#39d98a}.red{color:#ff6464}
+button{width:100%;padding:16px;margin:7px 0;border:0;border-radius:10px;font-size:17px;font-weight:bold}
+.start{background:#24b878;color:white}
+.stop{background:#df4545;color:white}
+canvas{width:100%;height:190px}
+small{color:#aab6c8}
+</style>
+</head>
+<body>
+<header>🐝 BEE THE EXECUTER</header>
+
+<div class="card">
+<h3>GOLD TRADING – XAUUSD</h3>
+<small>DEMO SIMULATION – NOT LIVE MARKET DATA</small>
+<div class="price" id="price">$2650.00</div>
+<div id="movement">Waiting for market simulation</div>
+</div>
+
+<div class="card">
+<h3>LIVE CANDLE SIMULATION</h3>
+<canvas id="chart" width="600" height="220"></canvas>
+</div>
+
+<div class="card">
+<h3>TRADING SIGNAL</h3>
+<div id="signal">WAITING</div>
+<p>Take Profit: <span id="tp">--</span></p>
+<p>Stop Loss: <span id="sl">--</span></p>
+<p>Risk per trade: 0.5%</p>
+</div>
+
+<div class="card">
+<h3>BOT CONTROL</h3>
+<button class="start" onclick="startBot()">▶ START BOT</button>
+<button class="stop" onclick="stopBot()">■ STOP BOT</button>
+<p id="status">Bot stopped</p>
+</div>
+
+<div class="card">
+<h3>DEMO ACCOUNT</h3>
+<p>Starting balance: $100</p>
+<p>Risk setting: 0.5%</p>
+<p>Maximum simulated risk: $0.50 per trade</p>
+<p>Trading mode: Demo only</p>
+</div>
+
+<div class="card">
+<h3>IMPORTANT</h3>
+<small>This is an offline interface prototype. Prices, candles and signals are simulated. It does not connect to XM, receive live XAUUSD prices or execute trades. Live trading requires a separately configured and tested MT5 connection.</small>
+</div>
+
+<script>
+let price=2650;
+let running=false;
+let timer=null;
+let candles=Array.from({length:30},()=>price);
+
+function draw(){
+ const c=document.getElementById("chart");
+ const x=c.getContext("2d");
+ x.clearRect(0,0,600,220);
+ x.strokeStyle="#39465a";
+ for(let i=0;i<5;i++){
+  x.beginPath();x.moveTo(0,i*50);x.lineTo(600,i*50);x.stroke();
+ }
+ candles.forEach((v,i)=>{
+  let old=i===0?v:candles[i-1];
+  let up=v>=old;
+  x.fillStyle=up?"#24c78a":"#ff6060";
+  let y=190-(v-2640)*12;
+  x.fillRect(i*19,y,11,Math.max(3,Math.abs(v-old)*12));
+ });
+}
+
+function tick(){
+ let old=price;
+ price+= (Math.random()-.5)*2;
+ candles.push(price);
+ if(candles.length>30)candles.shift();
+ document.getElementById("price").textContent="$"+price.toFixed(2);
+ document.getElementById("movement").textContent=
+ price>=old?"▲ Simulated upward movement":"▼ Simulated downward movement";
+ draw();
+}
+
+function startBot(){
+ if(running)return;
+ running=true;
+ document.getElementById("status").textContent="Bot running – simulation only";
+ timer=setInterval(()=>{
+  tick();
+  let buy=price>=candles[candles.length-2];
+  let direction=buy?1:-1;
+  document.getElementById("signal").innerHTML=
+   buy?'<span class="green">SIMULATED BUY</span>':
+   '<span class="red">SIMULATED SELL</span>';
+  document.getElementById("tp").textContent=(price+direction*3).toFixed(2);
+  document.getElementById("sl").textContent=(price-direction*2).toFixed(2);
+ },2000);
+}
+
+function stopBot(){
+ running=false;
+ clearInterval(timer);
+ document.getElementById("status").textContent="Bot stopped";
+ document.getElementById("signal").textContent="WAITING";
+ document.getElementById("tp").textContent="--";
+ document.getElementById("sl").textContent="--";
+}
+draw();
+</script>
+</body>
+</html>
