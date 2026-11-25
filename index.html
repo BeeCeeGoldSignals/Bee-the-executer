@@ -1,128 +1,68 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101827">
-<title>Bee the Executer</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#101827;color:white;font-family:Arial,sans-serif;padding:18px}
-header{text-align:center;color:#f5c542;font-size:27px;font-weight:bold;padding:18px}
-.card{background:#1d293b;padding:18px;border-radius:14px;margin:14px 0}
-h3{margin-top:0;color:#f5c542}
-.price{font-size:32px;font-weight:bold}
-.green{color:#39d98a}.red{color:#ff6464}
-button{width:100%;padding:16px;margin:7px 0;border:0;border-radius:10px;font-size:17px;font-weight:bold}
-.start{background:#24b878;color:white}
-.stop{background:#df4545;color:white}
-canvas{width:100%;height:190px}
-small{color:#aab6c8}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101820">
+  <meta name="description" content="Bee the Executer — XAUUSD demo trading dashboard">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Bee the Executer</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1118;--panel:#121d28;--panel2:#172432;--line:#263747;--muted:#9aabba;--text:#f2f6fa;--gold:#f4bd45;--green:#35c98b;--red:#ff6b72}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172636 0,#0b1118 52%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:env(safe-area-inset-top) 14px calc(22px + env(safe-area-inset-bottom))}
+    .wrap{max-width:760px;margin:auto}.top{display:flex;align-items:center;gap:12px;padding:18px 2px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#ffe08a,#d88b12);display:grid;place-items:center;color:#17202a;font-size:25px;font-weight:900}.brand{font-size:20px;font-weight:800;letter-spacing:.2px}.sub{font-size:12px;color:var(--muted)}.pill{margin-left:auto;border:1px solid #735b2b;color:#ffdb83;border-radius:30px;padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap}
+    .notice{background:#352a16;border:1px solid #6b5122;color:#ffe4a6;border-radius:12px;padding:12px 13px;font-size:12px;line-height:1.5;margin:8px 0 14px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:15px;min-width:0}.wide{grid-column:1/-1}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}.value{font-size:23px;font-weight:800;margin-top:5px}.small{font-size:12px;color:var(--muted);margin-top:4px}.gold{color:var(--gold)}.green{color:var(--green)}.red{color:var(--red)}
+    .charthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.chart{width:100%;height:210px;display:block;background:#0b141d;border-radius:10px;border:1px solid #243545}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}button{border:0;border-radius:12px;padding:14px 12px;font-size:14px;font-weight:800;cursor:pointer}.start{background:var(--green);color:#062417}.stop{background:#344454;color:#fff}.start:disabled,.stop:disabled{opacity:.45}
+    .status{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:12px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:50%;background:#8997a5}.dot.on{background:var(--green);box-shadow:0 0 10px #35c98b}
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}label{display:block;color:var(--muted);font-size:12px}input{width:100%;margin-top:6px;background:#0b141d;border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);font:inherit}
+    .signal{background:#0d1721;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;line-height:1.6;font-size:13px}.footer{text-align:center;color:#718292;font-size:11px;padding:18px 4px}
+    @media(min-width:600px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wide{grid-column:span 2}.chartcard{grid-column:span 4}}
+  </style>
 </head>
-<body>
-<header>🐝 BEE THE EXECUTER</header>
-
-<div class="card">
-<h3>GOLD TRADING – XAUUSD</h3>
-<small>DEMO SIMULATION – NOT LIVE MARKET DATA</small>
-<div class="price" id="price">$2650.00</div>
-<div id="movement">Waiting for market simulation</div>
-</div>
-
-<div class="card">
-<h3>LIVE CANDLE SIMULATION</h3>
-<canvas id="chart" width="600" height="220"></canvas>
-</div>
-
-<div class="card">
-<h3>TRADING SIGNAL</h3>
-<div id="signal">WAITING</div>
-<p>Take Profit: <span id="tp">--</span></p>
-<p>Stop Loss: <span id="sl">--</span></p>
-<p>Risk per trade: 0.5%</p>
-</div>
-
-<div class="card">
-<h3>BOT CONTROL</h3>
-<button class="start" onclick="startBot()">▶ START BOT</button>
-<button class="stop" onclick="stopBot()">■ STOP BOT</button>
-<p id="status">Bot stopped</p>
-</div>
-
-<div class="card">
-<h3>DEMO ACCOUNT</h3>
-<p>Starting balance: $100</p>
-<p>Risk setting: 0.5%</p>
-<p>Maximum simulated risk: $0.50 per trade</p>
-<p>Trading mode: Demo only</p>
-</div>
-
-<div class="card">
-<h3>IMPORTANT</h3>
-<small>This is an offline interface prototype. Prices, candles and signals are simulated. It does not connect to XM, receive live XAUUSD prices or execute trades. Live trading requires a separately configured and tested MT5 connection.</small>
-</div>
-
+<body><main class="wrap">
+  <header class="top"><div class="logo">B</div><div><div class="brand">Bee the Executer</div><div class="sub">Gold trading companion</div></div><div class="pill">DEMO SIMULATOR</div></header>
+  <div class="notice"><strong>Demo only — no broker connection.</strong> This version uses simulated prices and does not receive live XAUUSD data or place orders with XM. Use it to test the interface and workflow only. Never enter your XM password here.</div>
+  <section class="grid">
+    <div class="card"><div class="label">Instrument</div><div class="value gold">XAUUSD</div><div class="small">Gold / US Dollar</div></div>
+    <div class="card"><div class="label">Timeframe</div><div class="value">M1</div><div class="small">Fast scalping view</div></div>
+    <div class="card"><div class="label">Risk setting</div><div class="value">0.5%</div><div class="small">Per simulated trade</div></div>
+    <div class="card"><div class="label">Demo balance</div><div class="value" id="balance">$100.00</div><div class="small">Illustrative balance</div></div>
+    <div class="card chartcard">
+      <div class="charthead"><div><div class="label">Candlestick chart</div><div class="small" id="marketState">Waiting to start</div></div><div class="value gold" id="price">$2,650.00</div></div>
+      <canvas id="chart" class="chart" aria-label="Simulated candlestick chart"></canvas>
+      <div class="controls"><button class="start" id="startBtn">▶ START SIMULATION</button><button class="stop" id="stopBtn" disabled>■ STOP</button></div>
+      <div class="status"><span class="dot" id="dot"></span><span id="runStatus">Stopped — simulation is off</span></div>
+    </div>
+    <div class="card"><div class="label">Last simulated signal</div><div class="value" id="direction">—</div><div class="small" id="signalTime">No signal yet</div></div>
+    <div class="card"><div class="label">Suggested stop loss</div><div class="value red" id="sl">—</div><div class="small">Simulation only</div></div>
+    <div class="card"><div class="label">Suggested take profit</div><div class="value green" id="tp">—</div><div class="small">Simulation only</div></div>
+    <div class="card"><div class="label">Market condition</div><div class="value" id="condition">—</div><div class="small">Illustrative classification</div></div>
+    <div class="card wide">
+      <div class="label">Simulation settings</div>
+      <div class="fields">
+        <label>Demo balance (USD)<input id="startingBalance" type="number" min="10" step="10" value="100"></label>
+        <label>Risk per trade (%)<input id="risk" type="number" min="0.1" max="0.5" step="0.1" value="0.5"></label>
+      </div>
+      <div class="small">Settings are local to this phone. Risk is capped at 0.5% in this prototype.</div>
+    </div>
+    <div class="card wide"><div class="label">Activity log</div><div class="signal" id="log" aria-live="polite">Ready. Press START SIMULATION to view generated sample candles. No real trades will be opened.</div></div>
+  </section>
+  <div class="footer">Bee the Executer • Prototype v1.0 • Educational demo, not financial advice</div>
+</main>
 <script>
-let price=2650;
-let running=false;
-let timer=null;
-let candles=Array.from({length:30},()=>price);
-
-function draw(){
- const c=document.getElementById("chart");
- const x=c.getContext("2d");
- x.clearRect(0,0,600,220);
- x.strokeStyle="#39465a";
- for(let i=0;i<5;i++){
-  x.beginPath();x.moveTo(0,i*50);x.lineTo(600,i*50);x.stroke();
- }
- candles.forEach((v,i)=>{
-  let old=i===0?v:candles[i-1];
-  let up=v>=old;
-  x.fillStyle=up?"#24c78a":"#ff6060";
-  let y=190-(v-2640)*12;
-  x.fillRect(i*19,y,11,Math.max(3,Math.abs(v-old)*12));
- });
-}
-
-function tick(){
- let old=price;
- price+= (Math.random()-.5)*2;
- candles.push(price);
- if(candles.length>30)candles.shift();
- document.getElementById("price").textContent="$"+price.toFixed(2);
- document.getElementById("movement").textContent=
- price>=old?"▲ Simulated upward movement":"▼ Simulated downward movement";
- draw();
-}
-
-function startBot(){
- if(running)return;
- running=true;
- document.getElementById("status").textContent="Bot running – simulation only";
- timer=setInterval(()=>{
-  tick();
-  let buy=price>=candles[candles.length-2];
-  let direction=buy?1:-1;
-  document.getElementById("signal").innerHTML=
-   buy?'<span class="green">SIMULATED BUY</span>':
-   '<span class="red">SIMULATED SELL</span>';
-  document.getElementById("tp").textContent=(price+direction*3).toFixed(2);
-  document.getElementById("sl").textContent=(price-direction*2).toFixed(2);
- },2000);
-}
-
-function stopBot(){
- running=false;
- clearInterval(timer);
- document.getElementById("status").textContent="Bot stopped";
- document.getElementById("signal").textContent="WAITING";
- document.getElementById("tp").textContent="--";
- document.getElementById("sl").textContent="--";
-}
-draw();
+const canvas=document.getElementById('chart'),ctx=canvas.getContext('2d');
+let candles=[],running=false,timer=null,balance=100,lastPrice=2650,tradeCount=0;
+const $=id=>document.getElementById(id);
+function addCandle(){const open=lastPrice,move=(Math.random()-.5)*2.4,close=Math.max(1,open+move),high=Math.max(open,close)+Math.random()*.8,low=Math.min(open,close)-Math.random()*.8;candles.push({open,close,high,low});if(candles.length>38)candles.shift();lastPrice=close;return candles[candles.length-1]}
+function draw(){const dpr=window.devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);if(!candles.length)return;const min=Math.min(...candles.map(c=>c.low))-1,max=Math.max(...candles.map(c=>c.high))+1,range=max-min;ctx.strokeStyle='#20303e';ctx.lineWidth=1;for(let i=1;i<4;i++){let y=h*i/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}const slot=w/candles.length; candles.forEach((c,i)=>{let x=i*slot+slot/2,y=v=>h-(v-min)/range*h;let up=c.close>=c.open;ctx.strokeStyle=up?'#35c98b':'#ff6b72';ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.moveTo(x,y(c.high));ctx.lineTo(x,y(c.low));ctx.stroke();let top=y(Math.max(c.open,c.close)),bottom=y(Math.min(c.open,c.close));ctx.fillRect(x-slot*.28,top,Math.max(2,slot*.56),Math.max(2,bottom-top))})}
+function log(msg){$('log').textContent=new Date().toLocaleTimeString()+' — '+msg}
+function tick(){const c=addCandle();$('price').textContent='$'+lastPrice.toFixed(2);let recent=candles.slice(-8),avg=recent.reduce((s,x)=>s+x.close,0)/recent.length;let spread=Math.max(...recent.map(x=>x.high))-Math.min(...recent.map(x=>x.low));let condition=spread<3?'SIDEWAYS':'MOVING';$('condition').textContent=condition;$('marketState').textContent='Simulated market • '+condition;draw();if(candles.length>8&&Math.random()>.62){const dir=c.close>=avg?'BUY':'SELL',risk=Math.min(.5,Math.max(.1,Number($('risk').value)||.5)),dist=2.5;const sl=dir==='BUY'?lastPrice-dist:lastPrice+dist,tp=dir==='BUY'?lastPrice+dist*1.5:lastPrice-dist*1.5;$('direction').textContent=dir;$('direction').className='value '+(dir==='BUY'?'green':'red');$('signalTime').textContent='Sample signal • '+new Date().toLocaleTimeString();$('sl').textContent='$'+sl.toFixed(2);$('tp').textContent='$'+tp.toFixed(2);tradeCount++;log('Simulated '+dir+' signal. Suggested SL $'+sl.toFixed(2)+' / TP $'+tp.toFixed(2)+'. No order sent.')} }
+function start(){if(running)return;const b=Number($('startingBalance').value);if(!Number.isFinite(b)||b<10){log('Enter a demo balance of at least $10.');return}balance=b;$('balance').textContent='$'+balance.toFixed(2);running=true;$('startBtn').disabled=true;$('stopBtn').disabled=false;$('dot').classList.add('on');$('runStatus').textContent='Running — simulated data only';log('Simulation started. Sample prices are not live market quotes.');for(let i=0;i<20;i++)addCandle();draw();tick();timer=setInterval(tick,1800)}
+function stop(){running=false;clearInterval(timer);$('startBtn').disabled=false;$('stopBtn').disabled=true;$('dot').classList.remove('on');$('runStatus').textContent='Stopped — simulation is off';log('Simulation stopped. No broker orders were placed.')}
+$('startBtn').addEventListener('click',start);$('stopBtn').addEventListener('click',stop);window.addEventListener('resize',draw);draw();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
-</body>
-</html>
+</body></html>
