@@ -1,4 +1,57 @@
 
+void OnTick()
+{
+   static datetime lastBar = 0;
+
+   datetime currentBar = iTime(_Symbol, TimeFrame, 0);
+
+   if(currentBar == lastBar || currentBar == 0)
+      return;
+
+   lastBar = currentBar;
+
+   double ema50[2], ema200[2];
+   double rsi[2], macdMain[2], macdSignal[2];
+
+   ArraySetAsSeries(ema50, true);
+   ArraySetAsSeries(ema200, true);
+   ArraySetAsSeries(rsi, true);
+   ArraySetAsSeries(macdMain, true);
+   ArraySetAsSeries(macdSignal, true);
+
+   if(CopyBuffer(fastHandle, 0, 0, 2, ema50) != 2)
+      return;
+
+   if(CopyBuffer(slowHandle, 0, 0, 2, ema200) != 2)
+      return;
+
+   if(CopyBuffer(rsiHandle, 0, 0, 2, rsi) != 2)
+      return;
+
+   if(CopyBuffer(macdHandle, 0, 0, 2, macdMain) != 2)
+      return;
+
+   if(CopyBuffer(macdHandle, 1, 0, 2, macdSignal) != 2)
+      return;
+
+   // Use the last completed candle
+   bool buySignal =
+      ema50[1] > ema200[1] &&
+      rsi[1] > 50 && rsi[1] < 70 &&
+      macdMain[1] > macdSignal[1];
+
+   bool sellSignal =
+      ema50[1] < ema200[1] &&
+      rsi[1] < 50 && rsi[1] > 30 &&
+      macdMain[1] < macdSignal[1];
+
+   if(buySignal)
+      Print("DONE & DUSTED: BUY SIGNAL on ", _Symbol);
+
+   if(sellSignal)
+      Print("DONE & DUSTED: SELL SIGNAL on ", _Symbol);
+}
+
 //+------------------------------------------------------------------+
 //|                  DONE & DUSTED                                   |
 //|                  MT5 Expert Advisor                              |
